@@ -3,8 +3,6 @@
 require 'yaml'
 require 'xmpp4r'
 require 'xmpp4r/muc/helper/simplemucclient'
-require 'pry'
-require 'pry-nav'
 
 require File.dirname(__FILE__) + "/plugin"
 
@@ -21,17 +19,14 @@ $CONFIG['plugins'].each do |plugin|
   end
 end
 
-loaded_plugins = []
-
 # connect and authenticate with the server
 client = Jabber::Client.new(Jabber::JID::new($CONFIG['jabber_id']))
 client.connect
 client.auth($CONFIG['password'])
 muc = Jabber::MUC::SimpleMUCClient.new(client)
 
-BotPlugin.plugins.each do |p|
-  loaded_plugins << p.new(muc, loaded_plugins)
-end
+loaded_plugins = []
+BotPlugin.plugins.each { |p| loaded_plugins << p.new(muc, loaded_plugins) }
 
 # set up callback
 muc.on_message do |time,nick,text|
