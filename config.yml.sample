@@ -1,0 +1,7 @@
+#sample config
+botti:
+  jabber_id: adam@jabber.org/Bot
+  password: password
+  bot_nick: FriendBot
+  room_id: room@conference.jabber.org
+  plugins: [plugins/help]

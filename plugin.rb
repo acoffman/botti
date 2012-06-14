@@ -1,16 +1,13 @@
-# base class for all bot plugins
-#
-
-class BotPluginBase
+module BotPlugin
+  @plugins = []
 
   def initialize(muc, plugins)
     @muc = muc
-    @plugins = plugins
+    @plugin_instances = plugins
   end
 
   def process(time, nick, command)
     puts "warning: undefined process()"
-    return false
   end
 
   def help_list(time, nick)
@@ -22,5 +19,14 @@ class BotPluginBase
     puts "warning: undefined help()"
     return false
   end
+
+  def self.included(base)
+    @plugins << base
+  end
+
+  def self.plugins
+    @plugins
+  end
+
 
 end

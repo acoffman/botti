@@ -1,57 +1,48 @@
 #!/usr/bin/ruby
 
-# bot-specific stuff
-require 'config'
-
-# gems
-require 'rubygems'
+require 'yaml'
 require 'xmpp4r'
 require 'xmpp4r/muc/helper/simplemucclient'
+require 'pry'
+require 'pry-nav'
 
-$LOADED_PLUGINS = []
+require File.dirname(__FILE__) + "/plugin"
+
+$CONFIG = YAML.load_file(ARGV[0] || 'config.yml')['botti']
+
+bot_nick = $CONFIG['bot_nick']
+room_id = [$CONFIG['room_id'], $CONFIG['bot_nick']].join("/")
+
+$CONFIG['plugins'].each do |plugin|
+  begin
+      require File.dirname(__FILE__) + "/" + plugin
+  rescue LoadError => e
+      STDERR.puts "#{plugin} not loaded - #{e.message}"
+  end
+end
+
+loaded_plugins = []
 
 # connect and authenticate with the server
-client = Jabber::Client.new(Jabber::JID::new($botJID))
+client = Jabber::Client.new(Jabber::JID::new($CONFIG['jabber_id']))
 client.connect
-client.auth($password)
+client.auth($CONFIG['password'])
 muc = Jabber::MUC::SimpleMUCClient.new(client)
 
-# load up all the modules
-$PLUGINS.each { |m|
-  require "plugins/#{m}"
-}
-BotPlugin.constants.each { |m|
-  mod = BotPlugin.const_get(m)
-  if (mod < BotPluginBase)
-    $LOADED_PLUGINS << mod.new(muc, $LOADED_PLUGINS)
-  end
-}
+BotPlugin.plugins.each do |p|
+  loaded_plugins << p.new(muc, loaded_plugins)
+end
 
-# set up callbacks
-muc.on_message { |time,nick,text|
-  next unless text =~ /^#{$botName}: /i
-
-  command = text =~ /^#{$botName}: (.*)/i && $1
-  command = command.strip
-   
-  found=false
-  $LOADED_PLUGINS.each { |p|
-    if (p.process(time, nick, command) == true)
-      found=true
-      break
-    else
-      next
-    end
-  }
-  muc.say("unrecognized command. \"help\" for a list.") unless found
-}
-
+# set up callback
+muc.on_message do |time,nick,text|
+  next unless command = text =~ /^#{bot_nick}: (.*)/i && $1.strip
+  muc.say("unrecognized command. \"help\" for a list.") unless loaded_plugins.inject(false){|found,p| p.process(time, nick, command) || found }
+end
 
 # join the room
-muc.join(Jabber::JID.new($roomJID))
+muc.join Jabber::JID.new(room_id)
 
 # just chill until killed
-#
 begin
   while true do
     sleep(1)
