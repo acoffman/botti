@@ -28,7 +28,7 @@ class Help
 
   def help(time, nick, command)
     return false unless command =~ /^help$/
-      @muc.say("#{nick}: help [topic]\nGet information on bot commands.")
+    @muc.say("#{nick}: help [topic]\nGet information on bot commands.")
     return true
   end
 
