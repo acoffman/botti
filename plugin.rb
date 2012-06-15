@@ -28,5 +28,8 @@ module BotPlugin
     @plugins
   end
 
+  def self.unload(plugin)
+      @plugins.delete(plugin)
+  end
 
 end

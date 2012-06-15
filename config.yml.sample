@@ -4,4 +4,4 @@ botti:
   password: password
   bot_nick: FriendBot
   room_id: room@conference.jabber.org
-  plugins: [plugins/help]
+  plugins: [plugins/help, plugins/echo, plugins/loader]

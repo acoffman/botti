@@ -1,4 +1,4 @@
-class HelpPlugin
+class Help
   include BotPlugin
 
   def initialize(muc, plugins)
@@ -19,7 +19,6 @@ class HelpPlugin
     else
       return false
     end
-
     return true
   end
 

@@ -1,4 +1,4 @@
-class EchoPlugin
+class Echo
   include BotPlugin
 
   def initialize(muc, plugins)
